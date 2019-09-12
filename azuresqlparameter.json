@@ -1,0 +1,75 @@
+{
+    "$schema": "http://schema.management.azure.com/schemas/2014-04-01-preview/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "administratorLogin": {
+            "value": "adminrahul123"
+        },
+        "administratorLoginPassword": {
+            "value": "Rahul@1234"
+        },
+        "collation": {
+            "value": "SQL_Latin1_General_CP1_CI_AS"
+        },
+        "databaseName": {
+            "value": "rahuldemodatabase"
+        },
+        "tier": {
+            "value": "Standard"
+        },
+        "skuName": {
+            "value": "S0"
+        },
+        "location": {
+            "value": "westus"
+        },
+        "createMODE": {
+			"value": "Default"
+        },
+        "sourceDatabaseeId": {
+			"value": ""
+        },
+        "maxSizeBytes": {
+            "value": 1073741824
+        },
+        "serverName": {
+            "value": "rahuldemoserver"
+        },
+        "sampleName": {
+            "value": "AdventureWorksLT"
+        },
+        "zoneRedundant": {
+            "value": false
+        },
+        "licenseType": {
+            "value": "BasePrice"
+        },
+        "readScaleOut": {
+            "value": "Disabled"
+        },
+        "numberOfReplicas": {
+            "value": 0
+        },
+        "minCapacity": {
+            "value": 1
+        },
+        "autoPauseDelay": {
+            "value": 1
+        },
+        "enableADS": {
+            "value": false
+        },
+        "allowAzureIps": {
+            "value": true
+        },
+        "databaseTags": {
+            "value": "rahuld"
+        },
+        "serverTags": {
+            "value": "rahuls"
+        },
+        "enableVA": {
+            "value": false
+        }
+    }
+}
