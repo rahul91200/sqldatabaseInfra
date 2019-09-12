@@ -1,0 +1,293 @@
+{
+    "$schema": "http://schema.management.azure.com/schemas/2014-04-01-preview/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "administratorLogin": {
+            "type": "string",
+			"metadata": {
+				"description": "Name of the SQL server"
+			}
+        },
+        "administratorLoginPassword": {
+            "type": "securestring",
+			"metadata": {
+				"description": "Name of the SQL server"
+			}
+        },
+        "collation": {
+            "type": "string",
+			"minLength": 1,
+			"defaultValue": "SQL_Latin1_General_CP1_CI_AS",
+			"metadata": {
+				"description": "The collation of the database. Ignored when createMODE is not default."
+			}
+        },
+        "databaseName": {
+            "type": "string",
+			"defaultValue": "rahuldemodatabase",
+			"metadata": {
+				"description": "Name of the SQL database"
+			}
+        },
+        "tier": {
+            "type": "string",
+			"defaultValue": "Standard",
+			"metadata": {
+				"description": "tier type Free/Basic/Standard/Premium. Use standard for scaling service."
+			}
+        },
+        "skuName": {
+            "type": "string",
+			"defaultValue": "S0",
+			"metadata": {
+				"description": "Name of the sku. i.e. ServiceObjective."
+			}
+        },
+        "location": {
+            "type": "string",
+			"defaultValue": "westus",
+			"metadata": {
+				"description": "Name of the SQL server"
+			}
+        },
+		"createMODE": {
+			"type": "string",
+			"defaultValue": "Default",
+			"allowedValues": [
+				"Default",
+				"Copy",
+				"OnlineSecondary",
+				"PointInTimeRestore",
+				"Recovery",
+				"Restore",
+				"RestoreLongTermRetentionBackup",
+				"NonReadableSecondary"
+			],
+			"metadata": {
+				"description": "Specifies the mode of database creation."
+			}
+		},
+		"sourceDatabaseeId": {
+			"type": "string",
+			"defaultValue": "",
+			"metadata": {
+				"description": "sourceDatabaseId must be specified as the resource ID of the existing primary database. Required only for "
+			}
+		},
+        "maxSizeBytes": {
+            "type": "int",
+			"defaultValue": 1073741824,
+			"metadata": {
+				"description": "maxSizeBytes for database"
+			}
+        },
+        "serverName": {
+            "type": "string",
+			"defaultValue": "rahuldemoserver",
+			"metadata": {
+				"description": "Name of the SQL server"
+			}
+        },
+        "sampleName": {
+            "type": "string",
+            "defaultValue": "AdventureWorksLT",
+			"metadata": {
+				"description": "The name of the sample schema to apply when creating this database."
+			}
+        },
+        "zoneRedundant": {
+            "type": "bool",
+            "defaultValue": false,
+			"metadata": {
+				"description": "Name of the SQL server"
+			}
+        },
+        "licenseType": {
+            "type": "string",
+            "defaultValue": "BasePrice",
+			"metadata": {
+				"description": "The license type to apply for this database. - LicenseIncluded or BasePrice"
+			}
+        },
+        "readScaleOut": {
+            "type": "string",
+            "defaultValue": "Disabled",
+			"allowedValues": [
+				"Enabled",
+				"Disabled"
+			],
+			"metadata": {
+				"description": "The state of read-only routing. If enabled, connections that have application intent set to readonly in their connection string may be routed to a readonly secondary replica in the same region (Enabled/Disabled)"
+			}
+        },
+        "numberOfReplicas": {
+            "type": "int",
+            "defaultValue": 0,
+			"metadata": {
+				"description": "Name of the SQL server"
+			}
+        },
+        "minCapacity": {
+            "type": "int",
+            "defaultValue": 1,
+			"metadata": {
+				"description": "Minimal capacity that database will always have allocated, if not paused"
+			}
+        },
+        "autoPauseDelay": {
+            "type": "int",
+            "defaultValue": 1,
+			"metadata": {
+				"description": "Time in minutes after which database is automatically paused. A value of -1 means that automatic pause is disabled"
+			}
+        },
+        "enableADS": {
+            "type": "bool",
+            "defaultValue": false,
+			"metadata": {
+				"description": "True / false to for ADS"
+			}
+        },
+        "allowAzureIps": {
+            "type": "bool",
+            "defaultValue": true,
+			"metadata": {
+				"description": "Customize allowed IPs"
+			}
+        },
+        "databaseTags": {
+            "type": "string",
+            "defaultValue": "rahuld",
+			"metadata": {
+				"description": "Tag for resource creation. <your name>"
+			}
+        },
+        "serverTags": {
+            "type": "string",
+            "defaultValue": "rahuls",
+			"metadata": {
+				"description": "Tag for resource creation. <your name>"
+			}
+        },
+        "enableVA": {
+            "type": "bool",
+            "defaultValue": false,
+			"metadata": {
+				"description": "Vulnerability accessment"
+			}
+        }
+    },
+    "variables": {
+        "subscriptionId": "[subscription().subscriptionId]",
+        "resourceGroupName": "[resourceGroup().name]",
+        "uniqueStorage": "[uniqueString(variables('subscriptionId'), variables('resourceGroupName'), parameters('location'))]",
+        "storageName": "[tolower(concat('sqlva', variables('uniqueStorage')))]"
+    },
+    "resources": [
+        {
+            "condition": "[parameters('enableVA')]",
+            "apiVersion": "2016-01-01",
+            "type": "Microsoft.Storage/storageAccounts",
+            "name": "[variables('storageName')]",
+            "location": "[parameters('location')]",
+            "sku": {
+                "name": "Standard_LRS"
+            },
+            "kind": "Storage",
+            "properties": {}
+        },
+        {
+            "apiVersion": "2015-05-01-preview",
+            "location": "[parameters('location')]",
+			"type": "Microsoft.Sql/servers",
+            "tags": {
+				"Created By": "[parameters('serverTags')]"
+			},
+            "name": "[parameters('serverName')]",
+            "properties": {
+                "administratorLogin": "[parameters('administratorLogin')]",
+                "administratorLoginPassword": "[parameters('administratorLoginPassword')]",
+                "version": "12.0"
+            },
+            "resources": [
+                {
+                    "apiVersion": "2017-10-01-preview",
+					"type": "databases",
+                    "dependsOn": [
+                        "[concat('Microsoft.Sql/servers/', parameters('serverName'))]"
+                    ],
+                    "location": "[parameters('location')]",
+					"tags": {
+						"Created By": "[parameters('databaseTags')]"
+					},
+                    "name": "[parameters('databaseName')]",
+                    "properties": {
+                        "collation": "[parameters('collation')]",
+                        "maxSizeBytes": "[parameters('maxSizeBytes')]",
+                        "sampleName": "[parameters('sampleName')]",
+                        "zoneRedundant": "[parameters('zoneRedundant')]",
+                        "licenseType": "[parameters('licenseType')]",
+                        "readScale": "[parameters('readScaleOut')]",
+                        "readReplicaCount": "[parameters('numberOfReplicas')]",
+                        "minCapacity": "[parameters('minCapacity')]",
+                        "autoPauseDelay": "[parameters('autoPauseDelay')]",
+                    },
+                    "sku": {
+                        "name": "[parameters('skuName')]",
+                        "tier": "[parameters('tier')]"
+                    }
+                },
+                {
+                    "condition": "[parameters('allowAzureIps')]",
+					"type": "firewallrules",
+                    "apiVersion": "2014-04-01-preview",
+                    "dependsOn": [
+                        "[concat('Microsoft.Sql/servers/', parameters('serverName'))]"
+                    ],
+                    "location": "[parameters('location')]",
+                    "name": "AllowAllWindowsAzureIps",
+                    "properties": {
+                        "endIpAddress": "0.0.0.0",
+                        "startIpAddress": "0.0.0.0"
+                    }
+                },
+                {
+                    "condition": "[parameters('enableADS')]",
+                    "apiVersion": "2017-03-01-preview",
+                    "type": "securityAlertPolicies",
+                    "name": "Default",
+                    "dependsOn": [
+                        "[concat('Microsoft.Sql/servers/', parameters('serverName'))]",
+                        "[concat('Microsoft.Sql/servers/', parameters('serverName'), '/databases/', parameters('databaseName'))]"
+                    ],
+                    "properties": {
+                        "state": "Enabled",
+                        "disabledAlerts": [],
+                        "emailAddresses": [],
+                        "emailAccountAdmins": true
+                    }
+                },
+                {
+                    "condition": "[parameters('enableVA')]",
+                    "apiVersion": "2018-06-01-preview",
+                    "type": "vulnerabilityAssessments",
+                    "name": "Default",
+                    "properties": {
+                        "storageContainerPath": "[if(parameters('enableVA'), concat(reference(variables('storageName'), '2018-02-01').primaryEndpoints.blob, 'vulnerability-assessment'), '')]",
+                        "storageAccountAccessKey": "[if(parameters('enableVA'), listKeys(variables('storageName'), '2018-02-01').keys[0].value, '')]",
+                        "recurringScans": {
+                            "isEnabled": true,
+                            "emailSubscriptionAdmins": true,
+                            "emails": []
+                        }
+                    },
+                    "dependsOn": [
+                        "[concat('Microsoft.Sql/servers/', parameters('serverName'))]",
+                        "[concat('Microsoft.Storage/storageAccounts/', variables('storageName'))]",
+                        "[concat('Microsoft.Sql/servers/', parameters('serverName'), '/securityAlertPolicies/Default')]"
+                    ]
+                }
+            ]
+        }
+    ]
+}
