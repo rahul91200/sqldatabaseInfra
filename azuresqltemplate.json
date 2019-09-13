@@ -16,7 +16,6 @@
         },
         "collation": {
             "type": "string",
-			"minLength": 1,
 			"metadata": {
 				"description": "The collation of the database. Ignored when createMODE is not default."
 			}
